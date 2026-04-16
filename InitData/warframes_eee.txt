@@ -1,0 +1,85 @@
+Ash
+Ash Prime
+Atlas
+Atlas Prime
+Banshee
+Baruuk
+Baruuk Prime
+Caliban
+Caliban Prime
+Chroma
+Citrine
+Cyte-09
+Dagath
+Dante
+Ember
+Equinox
+Excalibur
+Excalibur Umbra
+Frost
+Gara
+Garuda
+Gauss Prime
+Grendel
+Gyre
+Gyre Prime
+Harrow
+Harrow Prime
+Hildryn
+Hildryn Prime
+Hydroid
+Hydroid Prime
+Inaros
+Inaros Prime
+Ivara
+Ivara Prime
+Jade
+Khora
+Koume
+Kullervo
+Lavos
+Lavos Prime
+Limbo
+Loki
+Mag
+Mag Prime
+Mesa
+Mesa Prime
+Mirage
+Nekros
+Nezha
+Nidus
+Nokko
+Nova
+Nyx
+Nyx Prime
+Oberon
+Octavia
+Oraxia
+Protea
+Protea Prime
+Qorvex
+Revenant
+Revenant Prime
+Rhino
+Saryn
+Saryn Prime
+Sevagoth
+Titania
+Trinity
+Trinity Prime
+Uriel
+Valkyr
+Valkyr Prime
+Vauban
+Volt
+Volt Prime
+Voruna
+Wisp Prime
+Wukong
+Wukong Prime
+Xaku
+Xaku Prime
+Yareli
+Yareli Prime
+Zephyr
