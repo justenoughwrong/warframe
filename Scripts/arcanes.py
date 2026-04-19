@@ -23,9 +23,7 @@ class Arcane():
                     self.qty = 15
                 case 5:
                     self.qty = 21
-
             self.rank = 0
-
             print(self.rank, self.qty)
 
     def convert_to_rank1(self):
@@ -45,12 +43,7 @@ class Arcane():
                     self.qty = 0
                 case 5:
                     self.qty = 0
-
             if isconverted:
                 self.rank = 1
 
             print(self.rank, self.qty)
-
-
-arcane_energize = Arcane('Arcane Energize', 7, 1)
-arcane_energize.convert_to_rank0()
