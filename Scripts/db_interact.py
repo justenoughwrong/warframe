@@ -12,111 +12,161 @@ db_connect = sqlite3.connect(DATABASE_DIR)
 db_cur = db_connect.cursor()
 
 
-def user_id(user) -> int:
+def get_user_id(user_name) -> int:
     '''return matched primary key'''
     query = f'''
         SELECT
-            user_id
+            u.user_id
         FROM
             users u
         WHERE
-            u.user_name like "{user}"
+            u.user_name like "{user_name}"
         '''
     fetch = db_cur.execute(query)
     result = int(fetch.fetchone()[0])
     return result
 
 
-def warframe_id(warframe) -> int:
+def get_warframe_id(warframe_name) -> int:
     '''return matched primary key'''
     query = f'''
         SELECT
-            warframe_id
+            w.warframe_id
         FROM
             warframes w
         WHERE
-            w.warframe_name like "{warframe}"
+            w.warframe_name like "{warframe_name}"
         '''
     fetch = db_cur.execute(query)
     result = int(fetch.fetchone()[0])
     return result
 
 
-def user_warframes_list(user) -> list:
+def get_user_warframes(user_name) -> tuple:
     '''return list of matched primary keys'''
     query = f'''
         SELECT
             w.warframe_id
         FROM
             warframes w
-            JOIN warframes_users_connector wuc ON w.warframe_id = wuc.warframe_id
-            JOIN users u ON u.user_id = wuc.user_id
+            JOIN warframes_users_lookup wul ON w.warframe_id = wul.warframe_id
+            JOIN users u ON u.user_id = wul.user_id
         WHERE
-            user_name like "{user}"
+            user_name like "{user_name}"
         '''
     fetch = db_cur.execute(query)
-    result = [int(row[0]) for row in fetch.fetchall()]
+    result_list = [int(row[0]) for row in fetch.fetchall()]
+    result = tuple(result_list)
     return result
 
 
-def warframe_users_list(warframe) -> list:
+def get_warframe_users(warframe_name) -> tuple:
     '''return list of matched primary keys'''
     query = f'''
         SELECT
             u.user_id
         FROM
             users u
-            JOIN warframes_users_connector wuc ON u.user_id
-            JOIN warframes w ON w.warframe_id = wuc.warframe_id
+            JOIN warframes_users_lookup wul ON u.user_id
+            JOIN warframes w ON w.warframe_id = wul.warframe_id
         WHERE
-            w.warframe_name like "{warframe}"
+            w.warframe_name like "{warframe_name}"
         '''
     fetch = db_cur.execute(query)
-    result = [int(row[0]) for row in fetch.fetchall()]
+    result_list = [int(row[0]) for row in fetch.fetchall()]
+    result = tuple(result_list)
     return result
 
 
-def users_names(user_id_list) -> list:
+def get_users_names(user_id_list) -> tuple:
     '''return list matching provided primary keys'''
+    user_id_tuple = tuple(user_id_list)
     query = f'''
         SELECT
             u.user_name
         FROM
             users u
         WHERE
-            u.user_id IN {user_id_list}
+            u.user_id IN {user_id_tuple}
         '''
     fetch = db_cur.execute(query)
-    result = [str(row[0]) for row in fetch.fetchall()]
+    result_list = [str(row[0]) for row in fetch.fetchall()]
+    result = tuple(result_list)
     return result
 
 
-def warframes_names(warframe_id_list) -> list:
+def get_warframes_names(warframe_id_list) -> list:
     '''return list matching provided primary keys'''
+    warframe_id_tuple = tuple(warframe_id_list)
     query = f'''
         SELECT
             w.warframe_name
         FROM
             warframes w
         WHERE
-            w.warframe_id IN {warframe_id_list}
+            w.warframe_id IN {warframe_id_tuple}
         '''
     fetch = db_cur.execute(query)
-    result = [str(row[0]) for row in fetch.fetchall()]
+    result_list = [str(row[0]) for row in fetch.fetchall()]
+    result = tuple(result_list)
     return result
 
 
 def insert_user(user_name) -> None:
     '''insert row'''
+    query = f'''
+        INSERT INTO
+            users (user_name)
+        VALUES
+            ("{user_name}")
+        '''
+    db_cur.execute(query)
+    db_connect.commit()
 
 
 def insert_warframe(warframe_name) -> None:
     '''insert row'''
+    query = f'''
+        INSERT INTO
+            warframes (warframe_name)
+        VALUES
+            ("{warframe_name}")
+        '''
+    db_cur.execute(query)
+    db_connect.commit()
 
 
-def insert_user_warframe(user_id, warframe_id) -> None:
+def insert_user_warframe(user_name, warframe_name) -> None:
     '''insert primary key pair'''
+    user_id = get_user_id(user_name)
+    warframe_id = get_warframe_id(warframe_name)
+    query = f'''
+        INSERT INTO
+            warframes_users_lookup (user_id, warframe_id)
+        VALUES
+            ({user_id}, {warframe_id})
+        '''
+    db_cur.execute(query)
+    db_connect.commit()
 
 
-def update_user_warframe(user_id, warframe_id) -> None:
+def update_user_warframe(user_name, old_warframe_name, new_warframe_name) -> None:
     '''update primary key pair'''
+    query = f'''
+        UPDATE
+            warframes_users_lookup
+        SET (user_id, warframe_id) = (
+            (SELECT u.user_id FROM users u WHERE u.user_name LIKE "{user_name}"),
+            (SELECT w.warframe_id FROM warframes w WHERE w.warframe_name LIKE "{new_warframe_name}")
+        )
+        WHERE
+            warframes_users_lookup.user_id = (
+                SELECT u.user_id FROM users u WHERE u.user_name LIKE "{user_name}"
+            )
+        AND
+            warframes_users_lookup.warframe_id = (
+                SELECT w.warframe_id FROM warframes w WHERE w.warframe_name LIKE "{old_warframe_name}"
+            )
+        '''
+    db_cur.execute(query)
+    db_connect.commit()
