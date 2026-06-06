@@ -11,7 +11,7 @@ Program must be run using Python Ver 3.14.3+.
 Python Ver 3.14.3+
 
 # RELEASE NOTES #
-    Version 
+    Version 0.5.0
 Removed unused functions from db_interact.py.
 Added sorting to SQL queries.
 Replaced SQL list results with generators.
