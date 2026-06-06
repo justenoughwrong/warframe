@@ -106,6 +106,15 @@ class WarframeFrame(ttk.Frame):
             self.visible = True
             frame.pack()
 
+    def _line_break(self, iter: 'iterable') -> str:
+        '''
+        Input: iterable object
+        Output: line break joined string
+        '''
+        return str.join('\n', iter)
+
+    # LAYOUTS #
+
     def _set_layout(self):
         match self.layout:
             case 0:
@@ -130,36 +139,36 @@ class WarframeFrame(ttk.Frame):
     def _get_user_names_layout(self):
         self.button.configure(text='Users')
         self.output.pack()
-        self.output.bind('<Map>', self._get_user_names)
+        self.output.bind('<Map>', self.get_user_names)
 
     def _get_warframe_names_layout(self):
         self.button.configure(text='Warframes')
         self.output.pack()
-        self.output.bind('<Map>', self._get_warframe_names)
+        self.output.bind('<Map>', self.get_warframe_names)
 
     def _get_user_warframes_layout(self):
-        self.button.configure(text='Search for warframes')
+        self.button.configure(text='Search user for warframes')
         self.entry1.pack()
         self.output.pack()
-        self.entry1.bind('<Return>', self._get_user_warframes)
+        self.entry1.bind('<Return>', self.get_user_warframes)
 
     def _get_warframe_users_layout(self):
-        self.button.configure(text='Search for users')
+        self.button.configure(text='Search warframe for users')
         self.entry1.pack()
         self.output.pack()
-        self.entry1.bind('<Return>', self._get_warframe_users)
+        self.entry1.bind('<Return>', self.get_warframe_users)
 
     def _insert_user_layout(self):
         self.button.configure(text='Add user')
         self.entry1.pack()
         self.output.pack()
-        self.entry1.bind('<Return>', self._insert_user)
+        self.entry1.bind('<Return>', self.insert_user)
 
     def _insert_warframe_layout(self):
         self.button.configure(text='Add warframe')
         self.entry1.pack()
         self.output.pack()
-        self.entry1.bind('<Return>', self._insert_warframe)
+        self.entry1.bind('<Return>', self.insert_warframe)
 
     def _insert_user_warframe_layout(self):
         self.button.configure(text='Add warframe to user')
@@ -170,8 +179,8 @@ class WarframeFrame(ttk.Frame):
         self.entry2_label.pack()
         self.entry2.pack()
         self.output.pack()
-        self.entry1.bind('<Return>', self._insert_user_warframe)
-        self.entry2.bind('<Return>', self._insert_user_warframe)
+        self.entry1.bind('<Return>', self.insert_user_warframe)
+        self.entry2.bind('<Return>', self.insert_user_warframe)
 
     def _update_user_warframe_layout(self):
         self.button.configure(text="Alter user's warframe")
@@ -185,33 +194,41 @@ class WarframeFrame(ttk.Frame):
         self.entry3_label.pack()
         self.entry3.pack()
         self.output.pack()
-        self.entry1.bind('<Return>', self._update_user_warframe)
-        self.entry2.bind('<Return>', self._update_user_warframe)
-        self.entry3.bind('<Return>', self._update_user_warframe)
+        self.entry1.bind('<Return>', self.update_user_warframe)
+        self.entry2.bind('<Return>', self.update_user_warframe)
+        self.entry3.bind('<Return>', self.update_user_warframe)
 
-    def _get_user_names(self, event):
-        self.output.configure(text=self.database_handler.get_user_names())
+    # INTERACTIONS #
 
-    def _get_warframe_names(self, event):
-        self.output.configure(text=self.database_handler.get_warframe_names())
+    def get_user_names(self, event):
+        formatted_names = self._line_break(
+            self.database_handler.get_user_names())
+        self.output.configure(text=formatted_names)
 
-    def _get_user_warframes(self, event):
-        self.output.configure(
-            text=self.database_handler.get_user_warframes_names(self.entry1.get()))
+    def get_warframe_names(self, event):
+        formatted_names = self._line_break(
+            self.database_handler.get_warframe_names())
+        self.output.configure(text=formatted_names)
 
-    def _get_warframe_users(self, event):
-        self.output.configure(
-            text=self.database_handler.get_warframe_users_names(self.entry1.get()))
+    def get_user_warframes(self, event):
+        formatted_names = self._line_break(self.database_handler.get_user_warframes_names(
+            self.entry1.get()))
+        self.output.configure(text=formatted_names)
 
-    def _insert_user(self, event):
+    def get_warframe_users(self, event):
+        formatted_name = self._line_break(
+            self.database_handler.get_warframe_users_names(self.entry1.get()))
+        self.output.configure(text=formatted_name)
+
+    def insert_user(self, event):
         self.database_handler.insert_user(self.entry1.get())
         self.output.configure(text=f'User "{self.entry1.get()}" added.')
 
-    def _insert_warframe(self, event):
+    def insert_warframe(self, event):
         self.database_handler.insert_warframe(self.entry1.get())
         self.output.configure(text=f'Warframe "{self.entry1.get()}" added.')
 
-    def _insert_user_warframe(self, event):
+    def insert_user_warframe(self, event):
         user = self.entry1.get()
         warframe = self.entry2.get()
         if user == '' or warframe == '':
@@ -222,7 +239,7 @@ class WarframeFrame(ttk.Frame):
             self.output.configure(
                 text=f'"{warframe}" added to user {user}')
 
-    def _update_user_warframe(self, event):
+    def update_user_warframe(self, event):
         user = self.entry1.get()
         old_warframe = self.entry2.get()
         new_warframe = self.entry3.get()

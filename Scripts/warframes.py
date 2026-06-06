@@ -20,6 +20,9 @@ if __name__ == "__main__":
                                'neuroptics': 0,
                                'systems': 0}
 
+        def __str__(self):
+            return 'Name: ' + self.name
+
         def mastered(self):
             '''set warframe to mastered'''
             self.is_mastered = True
