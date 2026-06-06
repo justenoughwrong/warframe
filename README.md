@@ -12,8 +12,8 @@ Python Ver 3.14.3+
 
 # RELEASE NOTES #
     Version 0.5.0
-Removed unused functions from db_interact.py.
-Added sorting to SQL queries.
+Removed unused functions from db_interact.py.  
+Added sorting to SQL queries.  
 Replaced SQL list results with generators.
 Fixed SQL statements with incorrect record returns.
 Adjusted user output formatting to use line breaks.
