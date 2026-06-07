@@ -14,11 +14,68 @@ class DatabaseHandler():
     def __init__(self):
         self._db_connect = sqlite3.connect(DATABASE_DIR)
         self._db_cur = self._db_connect.cursor()
+        self._setup()
 
     def __del__(self):
         self._db_cur.close()
         self._db_connect.close()
         print('database connection closed')
+
+    # DATABASE CREATION #
+
+    def _setup(self) -> None:
+        '''Build tables if they don't exist'''
+
+        # USER TABLE #
+        query = '''
+            CREATE TABLE IF NOT EXISTS users (
+            user_id integer PRIMARY KEY,
+            user_name varchar(24) NOT NULL UNIQUE
+            )
+            '''
+        self._db_cur.execute(query)
+        self._db_connect.commit()
+
+        # WARFRAME TABLE #
+        query = '''
+            CREATE TABLE IF NOT EXISTS warframes (
+            warframe_id integer PRIMARY KEY,
+            warframe_name varchar(20)
+            )
+            '''
+        self._db_cur.execute(query)
+        self._db_connect.commit()
+
+        # WARFRAME USER LOOKUP TABLE #
+        query = '''
+            CREATE TABLE IF NOT EXISTS warframes_users_lookup (
+            user_id integer,
+            warframe_id integer,
+            PRIMARY KEY (user_id, warframe_id),
+            FOREIGN KEY (user_id) REFERENCES users(user_id),
+            FOREIGN KEY (warframe_id) REFERENCES warframes(warframe_id)
+            )
+            '''
+        self._db_cur.execute(query)
+        self._db_connect.commit()
+
+        # POPULATE WARFRAME TABLE #
+        with open('././InitData/warframes.txt', encoding='utf-8') as f:
+            # Get existing name records
+            query = '''SELECT warframe_name FROM warframes'''
+            records = tuple(
+                self._db_cur.execute(query).fetchall()
+            )
+            # Store missing names
+            missing_warframes = []
+            for line in f:
+                line = line.strip()
+                if line not in records:
+                    missing_warframes.append(line)
+            # Commit missing names to database
+            self.insert_warframes(missing_warframes)
+
+            # WARFRAME INTERACTIONS #
 
     def _get_user_id(self, user_name) -> int:
         '''return primary key'''
@@ -125,6 +182,18 @@ class DatabaseHandler():
             VALUES ("{warframe_name}")
             '''
         self._db_cur.execute(query)
+        self._db_connect.commit()
+
+    def insert_warframes(self, names: iter) -> None:
+        '''
+        Input: iterable of strings
+        '''
+        names_formatted = [(name.title(),) for name in names]
+        query = '''
+            INSERT INTO warframes (warframe_name)
+            VALUES (?)
+            '''
+        self._db_cur.executemany(query, names_formatted)
         self._db_connect.commit()
 
     def insert_user_warframe(self, user_name, warframe_name) -> None:

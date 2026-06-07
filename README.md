@@ -11,6 +11,12 @@ Python Ver 3.14.3+
 
 
 # RELEASE NOTES #
+## Version 0.6.0
+Added database table exist check/creation.  
+Added warframe table check against warframes.txt to add missing warframes.  
+Updated warframes.txt with Follie and Voruna Prime.  
+Added function for inserting multiple warframes.
+
 ## Version 0.5.0
 Removed unused functions from db_interact.py.  
 Added sorting to SQL queries.  

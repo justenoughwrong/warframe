@@ -59,7 +59,7 @@ class App(tk.Tk):
         WarframeFrame(scroll_frame, 7, self.database_handler).pack(
             fill=X, expand=True)
 
-        self.bind('<KeyPress-Escape>', quit)
+        # self.bind('<KeyPress-Escape>', quit)
 
         self.mainloop()
 
@@ -98,7 +98,7 @@ class WarframeFrame(ttk.Frame):
 
         self._set_layout()
 
-    def _toggle_frame(self, frame):
+    def _toggle_frame(self, frame) -> None:
         if self.visible:
             self.visible = False
             frame.pack_forget()
@@ -106,12 +106,12 @@ class WarframeFrame(ttk.Frame):
             self.visible = True
             frame.pack()
 
-    def _line_break(self, iter: 'iterable') -> str:
+    def _line_break(self, it: iter) -> str:
         '''
         Input: iterable object
         Output: line break joined string
         '''
-        return str.join('\n', iter)
+        return str.join('\n', it)
 
     # LAYOUTS #
 
@@ -225,8 +225,9 @@ class WarframeFrame(ttk.Frame):
         self.output.configure(text=f'User "{self.entry1.get()}" added.')
 
     def insert_warframe(self, event):
-        self.database_handler.insert_warframe(self.entry1.get())
-        self.output.configure(text=f'Warframe "{self.entry1.get()}" added.')
+        self.database_handler.insert_warframe(self.entry1.get().title())
+        self.output.configure(
+            text=f'Warframe "{self.entry1.get().title()}" added.')
 
     def insert_user_warframe(self, event):
         user = self.entry1.get()

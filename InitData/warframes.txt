@@ -21,6 +21,7 @@ Equinox Prime
 Excalibur
 Excalibur Primeᶠ
 Excalibur Umbra
+Follie
 Frost
 Frost Prime
 Gara
@@ -101,6 +102,7 @@ Vauban Prime
 Volt
 Volt Prime
 Voruna
+Voruna Prime
 Wisp
 Wisp Prime
 Wukong
