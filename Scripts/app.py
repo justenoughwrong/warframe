@@ -75,7 +75,6 @@ class WarframeFrame(ttk.Frame):
     def __init__(self, parent, layout, database_handler):
         super().__init__(parent)
 
-        print(self.winfo_parent)
         self.database_handler = database_handler
         self.visible = False
         self.layout = layout

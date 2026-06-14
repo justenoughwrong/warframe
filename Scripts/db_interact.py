@@ -6,6 +6,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).parent.parent
 DATABASE_DIR = BASE_DIR / 'warframe.db'
+WARFRAME_NAMES_DIR = BASE_DIR / 'InitData' / 'warframes.txt'
 
 
 class DatabaseHandler():
@@ -19,7 +20,6 @@ class DatabaseHandler():
     def __del__(self):
         self._db_cur.close()
         self._db_connect.close()
-        print('database connection closed')
 
     # DATABASE CREATION #
 
@@ -40,7 +40,7 @@ class DatabaseHandler():
         query = '''
             CREATE TABLE IF NOT EXISTS warframes (
             warframe_id integer PRIMARY KEY,
-            warframe_name varchar(20)
+            warframe_name varchar(20) NOT NULL UNIQUE
             )
             '''
         self._db_cur.execute(query)
@@ -60,12 +60,12 @@ class DatabaseHandler():
         self._db_connect.commit()
 
         # POPULATE WARFRAME TABLE #
-        with open('././InitData/warframes.txt', encoding='utf-8') as f:
+        with open(WARFRAME_NAMES_DIR, encoding='utf-8') as f:
             # Get existing name records
             query = '''SELECT warframe_name FROM warframes'''
-            records = tuple(
-                self._db_cur.execute(query).fetchall()
-            )
+            records = [
+                record[0] for record in self._db_cur.execute(query).fetchall()
+            ]
             # Store missing names
             missing_warframes = []
             for line in f:
@@ -169,7 +169,7 @@ class DatabaseHandler():
     def insert_user(self, user_name) -> None:
         '''insert row'''
         query = f'''
-            INSERT INTO users (user_name)
+            INSERT OR IGNORE INTO users (user_name)
             VALUES ("{user_name}")
             '''
         self._db_cur.execute(query)
@@ -178,7 +178,7 @@ class DatabaseHandler():
     def insert_warframe(self, warframe_name) -> None:
         '''insert row'''
         query = f'''
-            INSERT INTO warframes (warframe_name)
+            INSERT OR IGNORE INTO warframes (warframe_name)
             VALUES ("{warframe_name}")
             '''
         self._db_cur.execute(query)
@@ -190,7 +190,7 @@ class DatabaseHandler():
         '''
         names_formatted = [(name.title(),) for name in names]
         query = '''
-            INSERT INTO warframes (warframe_name)
+            INSERT OR IGNORE INTO warframes (warframe_name)
             VALUES (?)
             '''
         self._db_cur.executemany(query, names_formatted)
@@ -201,7 +201,7 @@ class DatabaseHandler():
         user_id = self._get_user_id(user_name)
         warframe_id = self._get_warframe_id(warframe_name)
         query = f'''
-            INSERT INTO warframes_users_lookup (
+            INSERT OR IGNORE INTO warframes_users_lookup (
                 user_id,
                 warframe_id
             )
