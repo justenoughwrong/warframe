@@ -8,27 +8,27 @@ Program must be run using Python Ver 3.14.3+.
 Python Ver 3.14.3+
 
 ## TODO ##
-Implement propery decorators
-Implement getter decorators
-Implement setter decorators
-Replace lists with generators where possible. If a list is needed regardless, a generator is likely pointless.
-Implement context managers if useful for files/db.
-Adjust docstrings to be more useful
-Check that all functions show return type
-Check that all parameters indicate type
-Look into necessity of asserts
-Implement multiprocessing if useful. Multithreading unlikely to be much use.
-Look into using Cython or other ways to compile for executable
+Implement propery decorators.  
+Implement getter decorators.  
+Implement setter decorators.  
+Replace lists with generators where possible. If a list is needed regardless, a generator is likely pointless.  
+Implement context managers if useful for files/db.  
+Adjust docstrings to be more useful.  
+Check that all functions show return type.  
+Check that all parameters indicate type.  
+Look into necessity of asserts.  
+Implement multiprocessing if useful. Multithreading unlikely to be much use.  
+Look into using Cython or other ways to compile for executable.
 
 ## KNOWN BUGS ##
-UI won't reflect OR IGNORE on INSERT statements
+UI won't reflect OR IGNORE on INSERT statements.
 
 ## RELEASE NOTES ##
 ### Version 0.7.0
-Adjusted warframe.txt file path to use Pathlib.
-Created Pyinstaller build.
-Corrected SQL INSERTs to INSERT IGNOREs
-Added missing NOT NULL and UNIQUE constraints.
+Adjusted warframe.txt file path to use Pathlib.  
+Created Pyinstaller build.  
+Corrected SQL INSERTs to INSERT IGNOREs.  
+Added missing NOT NULL and UNIQUE constraints.  
 Fixed setup function comparison.
 
 ### Version 0.6.0
