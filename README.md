@@ -2,7 +2,8 @@
 App to handle Warframe data such as owned warframes, weapons, arcanes, etc. Currently only can store users, warframes, and user/warframe combos.
 
 Database stored locally.  
-Program must be run using Python Ver 3.14.3+.
+Program can be run using Python Ver 3.14.3+.  
+Alternatively, use dist folder and run dist/app/app.exe
 
 ## DEPENDENCIES ##
 Python Ver 3.14.3+
