@@ -18,7 +18,7 @@ Look into necessity of asserts.
 UI won't reflect OR IGNORE on INSERT statements.
 
 ## RELEASE NOTES ##
-### Version 1.0.0
+### Version 0.7.2
 Corrected previous version number.  
 Added Sirius & Orion to warframes.txt.
 Moved multiline SQL statements into individual files.  
