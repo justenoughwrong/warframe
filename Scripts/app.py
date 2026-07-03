@@ -1,11 +1,10 @@
-# Script for GUI class object
+'''Script for GUI class object.'''
 
 import tkinter as tk
-import tkinter.ttk as ttk
-from tkinter import *
 from functools import partial
-from db_interact import DatabaseHandler
+from tkinter import Canvas, ttk
 
+from db_interact import DatabaseHandler
 
 ########
 # MAIN #
@@ -13,9 +12,10 @@ from db_interact import DatabaseHandler
 
 
 class App(tk.Tk):
-    '''Main window'''
+    '''Main window.'''
 
-    def __init__(self, title, size):
+    def __init__(self, title: str, size: tuple) -> None:
+        '''Create GUI window and frames.'''
         super().__init__()
 
         # main setup
@@ -26,40 +26,43 @@ class App(tk.Tk):
         self.database_handler = DatabaseHandler()
 
         canvas_frame = ttk.Frame(self)
-        canvas_frame.pack(fill=BOTH, expand=True)
+        canvas_frame.pack(fill='both', expand=True)
 
         canvas = Canvas(canvas_frame)
-        canvas.pack(side=LEFT, fill=BOTH, expand=True)
+        canvas.pack(side='left', fill='both', expand=True)
 
         scrollbar_ = ttk.Scrollbar(
-            canvas_frame, orient='vertical', command=canvas.yview)
-        scrollbar_.pack(side=RIGHT, fill=Y)
+            canvas_frame, orient='vertical', command=canvas.yview,
+        )
+        scrollbar_.pack(side='right', fill='y')
 
         scroll_frame = ttk.Frame(canvas)
-        scroll_frame.bind('<Configure>', lambda event: canvas.configure(
-            scrollregion=canvas.bbox('all')))
+        scroll_frame.bind(
+            '<Configure>',
+            lambda _: canvas.configure(scrollregion=canvas.bbox('all')),
+        )
 
         canvas.configure(yscrollcommand=scrollbar_.set)
         canvas.create_window((0, 0), window=scroll_frame, anchor='n')
 
         WarframeFrame(scroll_frame, 0, self.database_handler).pack(
-            fill=X, expand=True, anchor='center')
+            fill='x', expand=True, anchor='center',
+        )
         WarframeFrame(scroll_frame, 1, self.database_handler).pack(
-            fill=X, expand=True, anchor='center')
+            fill='x', expand=True, anchor='center',
+        )
         WarframeFrame(scroll_frame, 2, self.database_handler).pack(
-            fill=X, expand=True)
+            fill='x', expand=True)
         WarframeFrame(scroll_frame, 3, self.database_handler).pack(
-            fill=X, expand=True)
+            fill='x', expand=True)
         WarframeFrame(scroll_frame, 4, self.database_handler).pack(
-            fill=X, expand=True)
+            fill='x', expand=True)
         WarframeFrame(scroll_frame, 5, self.database_handler).pack(
-            fill=X, expand=True)
+            fill='x', expand=True)
         WarframeFrame(scroll_frame, 6, self.database_handler).pack(
-            fill=X, expand=True)
+            fill='x', expand=True)
         WarframeFrame(scroll_frame, 7, self.database_handler).pack(
-            fill=X, expand=True)
-
-        # self.bind('<KeyPress-Escape>', quit)
+            fill='x', expand=True)
 
         self.mainloop()
 
@@ -70,9 +73,15 @@ class App(tk.Tk):
 
 
 class WarframeFrame(ttk.Frame):
-    '''frame for warframe lookups'''
+    '''Frame for warframe lookups.'''
 
-    def __init__(self, parent, layout, database_handler):
+    def __init__(
+            self,
+            parent: ttk.Frame,
+            layout: int,
+            database_handler: DatabaseHandler,
+    ) -> None:
+        '''Create and configure frame based on layout input.'''
         super().__init__(parent)
 
         self.database_handler = database_handler
@@ -89,15 +98,15 @@ class WarframeFrame(ttk.Frame):
         self.entry3 = ttk.Entry(self.frame)
         self.output = ttk.Label(self.frame, wraplength=200)
 
-        self.button.configure(command=partial(
-            self._toggle_frame, self.frame))
+        self.button.configure(command=partial(self._toggle_frame, self.frame))
         self.frame.configure(borderwidth=1, relief='sunken')
 
         self.button.pack()
 
         self._set_layout()
 
-    def _toggle_frame(self, frame) -> None:
+    def _toggle_frame(self, frame: ttk.Frame) -> None:
+        '''Toggle visibility of input frame.'''
         if self.visible:
             self.visible = False
             frame.pack_forget()
@@ -106,15 +115,12 @@ class WarframeFrame(ttk.Frame):
             frame.pack()
 
     def _line_break(self, it: iter) -> str:
-        '''
-        Input: iterable object
-        Output: line break joined string
-        '''
+        '''Return line break joined string from iterable input.'''
         return str.join('\n', it)
 
     # LAYOUTS #
 
-    def _set_layout(self):
+    def _set_layout(self) -> None:
         match self.layout:
             case 0:
                 self._get_user_names_layout()
@@ -135,41 +141,41 @@ class WarframeFrame(ttk.Frame):
             case _:
                 self.button.configure(text='This button is broken')
 
-    def _get_user_names_layout(self):
+    def _get_user_names_layout(self) -> None:
         self.button.configure(text='Users')
         self.output.pack()
-        self.output.bind('<Map>', self.get_user_names)
+        self.output.bind('<Map>', self.display_user_names)
 
-    def _get_warframe_names_layout(self):
+    def _get_warframe_names_layout(self) -> None:
         self.button.configure(text='Warframes')
         self.output.pack()
-        self.output.bind('<Map>', self.get_warframe_names)
+        self.output.bind('<Map>', self.display_warframe_names)
 
-    def _get_user_warframes_layout(self):
+    def _get_user_warframes_layout(self) -> None:
         self.button.configure(text='Search user for warframes')
         self.entry1.pack()
         self.output.pack()
-        self.entry1.bind('<Return>', self.get_user_warframes)
+        self.entry1.bind('<Return>', self.display_user_warframes)
 
-    def _get_warframe_users_layout(self):
+    def _get_warframe_users_layout(self) -> None:
         self.button.configure(text='Search warframe for users')
         self.entry1.pack()
         self.output.pack()
-        self.entry1.bind('<Return>', self.get_warframe_users)
+        self.entry1.bind('<Return>', self.display_warframe_users)
 
-    def _insert_user_layout(self):
+    def _insert_user_layout(self) -> None:
         self.button.configure(text='Add user')
         self.entry1.pack()
         self.output.pack()
         self.entry1.bind('<Return>', self.insert_user)
 
-    def _insert_warframe_layout(self):
+    def _insert_warframe_layout(self) -> None:
         self.button.configure(text='Add warframe')
         self.entry1.pack()
         self.output.pack()
         self.entry1.bind('<Return>', self.insert_warframe)
 
-    def _insert_user_warframe_layout(self):
+    def _insert_user_warframe_layout(self) -> None:
         self.button.configure(text='Add warframe to user')
         self.entry1_label.configure(text='Enter user')
         self.entry1_label.pack()
@@ -181,7 +187,7 @@ class WarframeFrame(ttk.Frame):
         self.entry1.bind('<Return>', self.insert_user_warframe)
         self.entry2.bind('<Return>', self.insert_user_warframe)
 
-    def _update_user_warframe_layout(self):
+    def _update_user_warframe_layout(self) -> None:
         self.button.configure(text="Alter user's warframe")
         self.entry1_label.configure(text='Enter user')
         self.entry1_label.pack()
@@ -199,47 +205,55 @@ class WarframeFrame(ttk.Frame):
 
     # INTERACTIONS #
 
-    def get_user_names(self, event):
+    def display_user_names(self, _: ttk.Frame.event_add) -> str:
+        '''Event function that returns usernames.'''
         formatted_names = self._line_break(
             self.database_handler.get_user_names())
         self.output.configure(text=formatted_names)
 
-    def get_warframe_names(self, event):
+    def display_warframe_names(self, _: ttk.Frame.event_add) -> str:
+        '''Event function that returns warframe names.'''
         formatted_names = self._line_break(
             self.database_handler.get_warframe_names())
         self.output.configure(text=formatted_names)
 
-    def get_user_warframes(self, event):
-        formatted_names = self._line_break(self.database_handler.get_user_warframes_names(
-            self.entry1.get()))
+    def display_user_warframes(self, _: ttk.Frame.event_add) -> str:
+        '''Event function that returns warframes of the user.'''
+        formatted_names = self._line_break(
+            self.database_handler.get_user_warframes_names(self.entry1.get()),
+        )
         self.output.configure(text=formatted_names)
 
-    def get_warframe_users(self, event):
+    def display_warframe_users(self, _: ttk.Frame.event_add) -> str:
+        '''Event function that returns users of the warframe.'''
         formatted_name = self._line_break(
-            self.database_handler.get_warframe_users_names(self.entry1.get()))
+            self.database_handler.get_warframe_users_names(self.entry1.get()),
+        )
         self.output.configure(text=formatted_name)
 
-    def insert_user(self, event):
+    def insert_user(self, _: ttk.Frame.event_add) -> str:
+        '''Event function that returns added username.'''
         self.database_handler.insert_user(self.entry1.get())
         self.output.configure(text=f'User "{self.entry1.get()}" added.')
 
-    def insert_warframe(self, event):
+    def insert_warframe(self, _: ttk.Frame.event_add) -> str:
+        '''Event function that returns added warframe.'''
         self.database_handler.insert_warframe(self.entry1.get().title())
         self.output.configure(
             text=f'Warframe "{self.entry1.get().title()}" added.')
 
-    def insert_user_warframe(self, event):
+    def insert_user_warframe(self, _: ttk.Frame.event_add) -> str:
+        '''Event function that returns added warframe of user.'''
         user = self.entry1.get()
         warframe = self.entry2.get()
         if user == '' or warframe == '':
             self.output.configure(text='One or more fields empty')
         else:
-            self.database_handler.insert_user_warframe(
-                user, warframe)
-            self.output.configure(
-                text=f'"{warframe}" added to user {user}')
+            self.database_handler.insert_user_warframe(user, warframe)
+            self.output.configure(text=f'"{warframe}" added to user {user}')
 
-    def update_user_warframe(self, event):
+    def update_user_warframe(self, _: ttk.Frame.event_add) -> str:
+        '''Event function that returns altered warframe of user.'''
         user = self.entry1.get()
         old_warframe = self.entry2.get()
         new_warframe = self.entry3.get()
@@ -249,7 +263,8 @@ class WarframeFrame(ttk.Frame):
             self.database_handler.update_user_warframe(
                 user, old_warframe, new_warframe)
             self.output.configure(
-                text=f'{user}\'s warframe "{old_warframe}" updated to "{new_warframe}"')
+                text=f'{user}\'s warframe "{old_warframe}" updated to "{new_warframe}"',
+            )
 
 
 App('Warframe Data App', (500, 500))

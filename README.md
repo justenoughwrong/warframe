@@ -9,14 +9,16 @@ Alternatively, use dist folder and run dist/app/app.exe
 Python Ver 3.14.3+
 
 ## TODO ##
+Rename functions to better inform their purpose.
+Split formatting and checking functionality to be reusable functions.
+Split sql statements into their own files.
+Add exceptions for database interactions so that errors can be shown to user.
 Implement propery decorators.  
 Implement getter decorators.  
 Implement setter decorators.  
 Replace lists with generators where possible. If a list is needed regardless, a generator is likely pointless.  
 Implement context managers if useful for files/db.  
 Adjust docstrings to be more useful.  
-Check that all functions show return type.  
-Check that all parameters indicate type.  
 Look into necessity of asserts.  
 Implement multiprocessing if useful. Multithreading unlikely to be much use.  
 Look into using Cython or other ways to compile for executable.
@@ -25,6 +27,12 @@ Look into using Cython or other ways to compile for executable.
 UI won't reflect OR IGNORE on INSERT statements.
 
 ## RELEASE NOTES ##
+### Version 0.8.0
+Implimented Ruff linter to learn better coding practices.  
+Adjusted code based on linter messages.  
+Replaced f-strings in SQL with placeholders. (As the database is only stored locally with no sensitive information, SQL injection not a concern yet. However, may as well fix it during the linting corrections to remove the warning.)  
+Removed unused script files.
+
 ### Version 0.7.0
 Adjusted warframe.txt file path to use Pathlib.  
 Created Pyinstaller build.  
