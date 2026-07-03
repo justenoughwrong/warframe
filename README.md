@@ -3,31 +3,29 @@ App to handle Warframe data such as owned warframes, weapons, arcanes, etc. Curr
 
 Database stored locally.  
 Program can be run using Python Ver 3.14.3+.  
-Alternatively, use dist folder and run dist/app/app.exe
+Alternatively, download only dist folder and run dist/app/app.exe
 
 ## DEPENDENCIES ##
 Python Ver 3.14.3+
 
 ## TODO ##
-Rename functions to better inform their purpose.
-Split formatting and checking functionality to be reusable functions.
-Split sql statements into their own files.
 Add exceptions for database interactions so that errors can be shown to user.
-Implement propery decorators.  
-Implement getter decorators.  
-Implement setter decorators.  
 Replace lists with generators where possible. If a list is needed regardless, a generator is likely pointless.  
-Implement context managers if useful for files/db.  
 Adjust docstrings to be more useful.  
 Look into necessity of asserts.  
-Implement multiprocessing if useful. Multithreading unlikely to be much use.  
-Look into using Cython or other ways to compile for executable.
 
 ## KNOWN BUGS ##
 UI won't reflect OR IGNORE on INSERT statements.
 
 ## RELEASE NOTES ##
-### Version 0.8.0
+### Version 1.0.0
+Corrected previous version number.  
+Added Sirius & Orion to warframes.txt.
+Moved multiline SQL statements into individual files.  
+Renamed functions with clearer names.  
+Removed TODOs that are currently unnecessary or may become irrelevant with future changes.
+
+### Version 0.7.1
 Implimented Ruff linter to learn better coding practices.  
 Adjusted code based on linter messages.  
 Replaced f-strings in SQL with placeholders. (As the database is only stored locally with no sensitive information, SQL injection not a concern yet. However, may as well fix it during the linting corrections to remove the warning.)  
