@@ -9,8 +9,7 @@ Alternatively, download only dist folder and run dist/app/app.exe
 Python Ver 3.14.3+
 
 ## TODO ##
-Add exceptions for database interactions so that errors can be shown to user.
-Replace lists with generators where possible. If a list is needed regardless, a generator is likely pointless.  
+Add exceptions for database interactions so that errors can be shown to user.  
 Adjust docstrings to be more useful.  
 Look into necessity of asserts.  
 
@@ -18,9 +17,13 @@ Look into necessity of asserts.
 UI won't reflect OR IGNORE on INSERT statements.
 
 ## RELEASE NOTES ##
+### Version 0.7.3
+Rebuilt dist with changes from 0.7.2.  
+Final upload for tkinter. Future uploads will be rebuild in preparation for use with Qt or other GUI builder.
+
 ### Version 0.7.2
 Corrected previous version number.  
-Added Sirius & Orion to warframes.txt.
+Added Sirius & Orion to warframes.txt.  
 Moved multiline SQL statements into individual files.  
 Renamed functions with clearer names.  
 Removed TODOs that are currently unnecessary or may become irrelevant with future changes.
