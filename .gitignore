@@ -2,8 +2,12 @@
 __pycache__
 
 # Pyinstaller
-app.spec
+*.spec
 build/
+dist/
+
+# PySide6
+*.ui
 
 # Ruff
 *.toml

@@ -1,24 +1,168 @@
 '''TODO add docstring.'''
 
+# Built-in Imports
 import sqlite3
 from pathlib import Path
+from types import NotImplementedType
 
+# Custom Imports
+from classes import User, Warframe
+from exceptions import NoMatchError
+
+# Constants
 BASE_DIR = Path(__file__).parent.parent
 DATABASE = BASE_DIR / 'warframe.db'
 WARFRAME_NAMES = BASE_DIR / 'InitData' / 'warframes.txt'
 SQL_DIR = BASE_DIR / 'sql'
 
 
-def test():
-    a = _get_ids('users', 'joojoo')
-    b = _get_ids('warframes', 'voruna, mesa, mag')
+def get_names(data_objects: tuple[
+    User |
+    Warframe |
+    NotImplementedType
+    ]) -> tuple:
+    '''Return a tuple of names from dataclass objects.'''
+    try:
+        len(data_objects)
+        return tuple(
+            _.name for _ in data_objects
+        )
+    except TypeError:
+        return (data_objects.name,)
 
-    a_str = ','.join(str(e) for e in a)
-    b_str = ','.join(str(e) for e in b)
-    return _param_dicts(a_str, b_str)
+
+def get_ids(data_objects: tuple[
+    User |
+    Warframe |
+    NotImplementedType
+    ]) -> tuple:
+    '''Return a tuple of ids from dataclass objects.'''
+    try:
+        len(data_objects)
+        return tuple(
+            _.id for _ in data_objects
+        )
+    except TypeError:
+        return (data_objects.id,)
 
 
-def _split_for_sql(text: str) -> tuple:
+def _split_for_sql(combined_tuple: tuple) -> tuple:
+    '''Breaks tuple into individual tuples for each element and returns the new tuple.
+
+    Returns:
+        Tuple of tupled values for SQL parameters.
+    '''
+    return tuple(
+        (_,) for _ in combined_tuple
+    )
+
+
+def get_all(table: str) -> tuple:
+    '''Retrieves name every row in the matching table. Names are stored in dataclass objects of a corresponding type to the table.
+
+    Args:
+        table: String representing the table to fetch from.
+
+    Returns:
+        Tuple of dataclass objects containing the corresponding names.
+    '''
+    with sqlite3.connect(DATABASE) as db:
+        match table:
+            case 'users':
+                query = Path(SQL_DIR / 'select_user_names.sql').read_text()
+                result = db.execute(query)
+                return tuple(
+                    User(str(row[0])) for row in result.fetchall()
+                )
+            case 'warframes':
+                query = Path(SQL_DIR / 'select_warframe_names.sql').read_text()
+                result = db.execute(query)
+                return tuple(
+                    Warframe(str(row[0])) for row in result.fetchall()
+                )
+            case _:
+                raise NoMatchError(table)
+
+
+def get_from_user(user: User, table: str) -> tuple:
+    '''Queries the user lookup table that matches the table arg. Filters results based on the name of the user.
+
+    Args:
+        user: Dataclass object that contains the user name. Used to filter the database query.
+        table: String representing the table joined by the lookup table.
+
+    Returns:
+        Tuple of dataclass objects matching the query results.
+    '''
+    with sqlite3.connect(DATABASE) as db:
+        params = {'user_name': user.name}
+        match table:
+            case 'warframes':
+                query = Path(SQL_DIR / 'select_warframes_of_user.sql').read_text()
+                result = db.execute(query, params)
+                return tuple(
+                    Warframe(str(row[0])) for row in result.fetchall()
+                )
+            case 'weapons':
+                raise NotImplementedError
+            case _:
+                raise NoMatchError(table)
+
+
+def get_users_of(data_object: Warframe | NotImplementedType, table: str) -> tuple:
+    '''Queries the user lookup table that matches the table arg. Filters results based on the name of the dataclass object.
+
+    Args:
+        data_object: Dataclass object that contains the name used to filter the database query.
+        table: String representing the table joined by the user lookup.
+
+    Returns:
+        Tuple of User objects matching the query results.
+    '''
+    with sqlite3.connect(DATABASE) as db:
+        match table:
+            case 'warframes':
+                query = Path(SQL_DIR / 'select_users_of_warframe.sql').read_text()
+                params = {'warframe_name': data_object.name}
+            case 'weapons':
+                raise NotImplementedError
+            case _:
+                raise NoMatchError(table)
+        result = db.execute(query, params)
+        return tuple(
+            User(str(row[0])) for row in result.fetchall()
+        )
+
+
+def add(data_objects: tuple[
+            User |
+            Warframe |
+            NotImplementedType],
+            table: str) -> None:
+    '''Inserts rows into the table matching the table arg. Saves the changes.
+
+    Args:
+        data_objects: Dataclass objects containing the values to insert.
+        table: String representing the table to insert to.
+    '''
+    with sqlite3.connect(DATABASE) as db:
+        match table:
+            case 'users':
+                sql = Path(SQL_DIR / 'add_user.sql').read_text()
+            case 'warframes':
+                sql = Path(SQL_DIR / 'add_warframe.sql').read_text()
+            case 'weapons':
+                raise NotImplementedError
+            case _:
+                raise NoMatchError(table)
+        params = _split_for_sql(get_names(data_objects))
+        db.executemany(sql, params)
+        db.commit()
+
+
+# STRING BASED
+
+def _split_for_sql_str(text: str) -> tuple:
     '''Splits and strips CSV string, then returns as tuples for sql execution.
 
     Returns:
@@ -34,10 +178,6 @@ def _split(text: str) -> tuple:
     return tuple(
         e.strip() for e in text.split(',')
     )
-
-
-def _iter_to_string():
-    pass
 
 
 def _param_dicts(key: str, values: str) -> tuple:
@@ -88,7 +228,7 @@ def _get_ids(table: str, names: str) -> tuple:
         )
 
 
-def get_all(table: str) -> tuple:
+def get_all_str(table: str) -> tuple:
     '''Queries table for names.
 
     Retrieves name from rows in the matching table.
@@ -113,13 +253,13 @@ def get_all(table: str) -> tuple:
         )
 
 
-def get_from_user(user_name: str, table: str) -> tuple:
+def get_from_user_str(user_name: str, table: str) -> tuple:
     '''Queries lookup tables for matching pairs.
 
     Queries the user lookup table of the provided args.
     Filters results based on the name arg.
 
-    Ars:
+    Args:
         user_name: string representing the name to filter the query with.
         table: string representing the table of the lookup.
 
@@ -140,13 +280,13 @@ def get_from_user(user_name: str, table: str) -> tuple:
         )
 
 
-def get_users_of(table: str, name: str) -> tuple:
+def get_users_of_str(table: str, name: str) -> tuple:
     '''Queries lookup tables for matching pairs.
 
     Queries the user lookup table of the provided args.
     Filters results based on the name arg.
 
-    Ars:
+    Args:
         table: string representing the table of the lookup.
         name: string representing the name to filter the query with.
 
@@ -167,7 +307,7 @@ def get_users_of(table: str, name: str) -> tuple:
         )
 
 
-def add(table: str, names: str) -> None:
+def add_str(table: str, names: str) -> None:
     '''Inserts rows to corresponding table.
 
     Matches SQL statement to table.
@@ -186,32 +326,32 @@ def add(table: str, names: str) -> None:
                 sql = Path(SQL_DIR / 'add_warframe.sql').read_text()
             case _:
                 print('TODO add query failed error.')
-        params = _split_for_sql(names)
+        params = _split_for_sql_str(names)
         db.executemany(sql, params)
         db.commit()
 
 
-def add_to(table1: str, name1: str, table2: str, name2: str) -> None:
-    '''Inserts rows to corresponding lookup table.
+# def add_to(table1: str, name1: str, table2: str, name2: str) -> None:
+#     '''Inserts rows to corresponding lookup table.
 
-    Args:
-        table1: string representing table of name1. Used to determine lookup table.
-        name1: string representing first name of lookup pair. Must be singular.
-        table2: string representing table of name2. Used to determine lookup table.
-        name2: string representing second name of lookup pair. May be one or more.
-    '''
-    with sqlite3.connect(DATABASE) as db:
-        tables = (table1, table2)
-        match tables:
-            case tables if 'users' in tables and 'warframes' in tables:
-                sql = Path(SQL_DIR / 'add_warframe_to_user.sql').read_text()
+#     Args:
+#         table1: string representing table of name1. Used to determine lookup table.
+#         name1: string representing first name of lookup pair. Must be singular.
+#         table2: string representing table of name2. Used to determine lookup table.
+#         name2: string representing second name of lookup pair. May be one or more.
+#     '''
+#     with sqlite3.connect(DATABASE) as db:
+#         tables = (table1, table2)
+#         match tables:
+#             case tables if 'users' in tables and 'warframes' in tables:
+#                 sql = Path(SQL_DIR / 'add_warframe_to_user.sql').read_text()
 
-            case _:
-                pass
-        print('params need to use user/warframe_id')
-        # print(params)
-        # if type(name1) == str:
-        #     params = {}
+#             case _:
+#                 pass
+#         print('params need to use user/warframe_id')
+#         # print(params)
+#         # if type(name1) == str:
+#         #     params = {}
 
 
 # def test():
