@@ -12,6 +12,16 @@ Python Ver 3.14.3+
 ## KNOWN ISSUES ##
 
 ## RELEASE NOTES ##
+### Version 1.2.0
+Created function to set dataclass object ids from the database.  
+Created function to add dataclass objects to a user in the corresponding lookup table.  
+Created function to add users to a dataclass object in the corresponding lookup table.  
+Corrected the type annotations of data_objects arguments.  
+Created function to return if arg is iterable.  
+Created function to return the type of arg or arg's first element.  
+Added error to raise when arg isn't iterable and must be.
+Restructured add and get_users_of functions to automate sql statement determination. No longer require a parameter to do so.  
+
 ### Version 1.1.0
 Created classes.py to contain User, Warframe, and future dataclasses.  
 Created exceptions.py to contain custom exceptions.  

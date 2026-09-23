@@ -5,6 +5,8 @@ WILL_ALTER_DATABASE: Signifies a break point in the script prior to any database
 non_altering_debug & debug: debug break points to enable quick of the final function in the respective section.
 '''
 
+from types import NotImplementedType
+
 import database_functions as df
 from classes import User, Warframe
 
@@ -12,7 +14,7 @@ joojoo = User('joojoo')
 eee = User('eee')
 bird = User('bird')
 otter = User('otter')
-names = (joojoo, eee, bird, otter)
+users = (joojoo, eee, bird, otter)
 voruna = Warframe('voruna')
 
 tse = User('tse')
@@ -22,18 +24,29 @@ ooo = Warframe('ooo')
 okk = Warframe('okk')
 occ = Warframe('occ')
 warframes= (ooo, okk, occ)
+future = NotImplementedType()
+incomplete = NotImplementedType()
+wip = (future, incomplete)
 
-df.get_names(names)
+df.iter_check(future)
+df.iter_check(wip)
+
+df.get_type(warframes)
+df.get_type(joojoo)
+
+# df.set_ids(voruna)
+
+df.get_names(users)
 df.get_names(joojoo)
 
-df._split_for_sql(df.get_names(names))  # noqa: SLF001
+df._split_for_sql(df.get_names(users))  # noqa: SLF001
 
 df.get_all('users')
 df.get_all('warframes')
 
 df.get_from_user(joojoo, 'warframes')
 
-df.get_users_of(voruna, 'warframes')
+df.get_users_of(voruna)
 
 # STRING BASED
 
@@ -59,8 +72,8 @@ non_altering_debug = 'End'
 
 WILL_ALTER_DATABASE = 'Continuing script will alter database!'
 
-df.add(warframes, 'warframes')
-df.add(tse, 'users')
+df.add(warframes)
+df.add(tse)
 
 # STRING BASED
 

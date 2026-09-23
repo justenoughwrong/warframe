@@ -1,5 +1,7 @@
+'''Script to contain dataclasses representing database tables.'''
+
 from dataclasses import dataclass
-from typing import ReadOnly
+
 
 @dataclass
 class User:

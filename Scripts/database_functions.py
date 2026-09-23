@@ -2,12 +2,14 @@
 
 # Built-in Imports
 import sqlite3
+import types
 from pathlib import Path
 from types import NotImplementedType
 
 # Custom Imports
+import classes
 from classes import User, Warframe
-from exceptions import NoMatchError
+from exceptions import NoMatchError, NotIterableError
 
 # Constants
 BASE_DIR = Path(__file__).parent.parent
@@ -16,34 +18,88 @@ WARFRAME_NAMES = BASE_DIR / 'InitData' / 'warframes.txt'
 SQL_DIR = BASE_DIR / 'sql'
 
 
-def get_names(data_objects: tuple[
-    User |
-    Warframe |
-    NotImplementedType
-    ]) -> tuple:
-    '''Return a tuple of names from dataclass objects.'''
+def iter_check(_) -> bool:
+    '''Returns true if arg is iterable.'''
     try:
-        len(data_objects)
+        len(_)
+    except TypeError:
+        return False
+    else:
+        return True
+
+
+def get_type(_) -> type:
+    '''Returns type of arg or arg[0].'''
+    if iter_check(_):
+        return type(_[0])
+    return type(_)
+
+
+def get_names(
+    data_objects:
+        tuple[User] |
+        tuple[Warframe] |
+        tuple[NotImplementedType] |
+        User |
+        Warframe |
+        NotImplementedType) -> tuple:
+    '''Return a tuple of names from dataclass objects.'''
+    if iter_check(data_objects):
         return tuple(
             _.name for _ in data_objects
         )
-    except TypeError:
-        return (data_objects.name,)
+    return (data_objects.name,)
 
 
-def get_ids(data_objects: tuple[
-    User |
-    Warframe |
-    NotImplementedType
-    ]) -> tuple:
+def get_ids(
+    data_objects:
+        tuple[User] |
+        tuple[Warframe] |
+        tuple[NotImplementedType] |
+        User |
+        Warframe |
+        NotImplementedType) -> tuple:
     '''Return a tuple of ids from dataclass objects.'''
-    try:
-        len(data_objects)
+    if iter_check(data_objects):
         return tuple(
             _.id for _ in data_objects
         )
-    except TypeError:
-        return (data_objects.id,)
+    return (data_objects.id,)
+
+# incomplete
+def set_ids(
+    data_objects:
+        tuple[User] |
+        tuple[Warframe] |
+        tuple[NotImplementedType] |
+        User |
+        Warframe |
+        NotImplementedType) -> None:
+    '''Queries database for ids from matching table. Sets id for each dataclass object.'''
+    if iter_check(data_objects):
+        match type(data_objects[0]):
+            case classes.User:
+                # set multiple user ids
+                pass
+            case classes.Warframe:
+                # set multiple warframe ids
+                pass
+            case types.NotImplementedType:
+                raise NotImplementedError
+            case _:
+                raise NoMatchError(type(data_objects[0]))
+    else:
+        match type(data_objects):
+            case classes.User:
+                # set single user id
+                pass
+            case classes.Warframe:
+                # set single warframe id
+                pass
+            case types.NotImplementedType:
+                raise NotImplementedError
+            case _:
+                raise NoMatchError(type(data_objects))
 
 
 def _split_for_sql(combined_tuple: tuple) -> tuple:
@@ -52,9 +108,12 @@ def _split_for_sql(combined_tuple: tuple) -> tuple:
     Returns:
         Tuple of tupled values for SQL parameters.
     '''
-    return tuple(
-        (_,) for _ in combined_tuple
-    )
+    try:
+        return tuple(
+            (_,) for _ in combined_tuple
+        )
+    except TypeError as err:
+        raise NotIterableError(combined_tuple) from err
 
 
 def get_all(table: str) -> tuple:
@@ -83,7 +142,7 @@ def get_all(table: str) -> tuple:
             case _:
                 raise NoMatchError(table)
 
-
+# only returns all of a user's _
 def get_from_user(user: User, table: str) -> tuple:
     '''Queries the user lookup table that matches the table arg. Filters results based on the name of the user.
 
@@ -108,53 +167,85 @@ def get_from_user(user: User, table: str) -> tuple:
             case _:
                 raise NoMatchError(table)
 
-
-def get_users_of(data_object: Warframe | NotImplementedType, table: str) -> tuple:
-    '''Queries the user lookup table that matches the table arg. Filters results based on the name of the dataclass object.
+# only returns all users of _
+def get_users_of(
+    data_object:
+        Warframe |
+        NotImplementedType) -> tuple:
+    '''Queries the user lookup table that matches arg's type. Filters results based on the name of the dataclass object.
 
     Args:
         data_object: Dataclass object that contains the name used to filter the database query.
-        table: String representing the table joined by the user lookup.
 
     Returns:
         Tuple of User objects matching the query results.
     '''
+    data_type = get_type(data_object)
     with sqlite3.connect(DATABASE) as db:
-        match table:
-            case 'warframes':
+        match data_type:
+            case classes.Warframe:
                 query = Path(SQL_DIR / 'select_users_of_warframe.sql').read_text()
                 params = {'warframe_name': data_object.name}
-            case 'weapons':
+            case types.NotImplementedType:
                 raise NotImplementedError
             case _:
-                raise NoMatchError(table)
+                raise NoMatchError(data_type)
         result = db.execute(query, params)
         return tuple(
             User(str(row[0])) for row in result.fetchall()
         )
 
 
-def add(data_objects: tuple[
-            User |
-            Warframe |
-            NotImplementedType],
-            table: str) -> None:
-    '''Inserts rows into the table matching the table arg. Saves the changes.
+def add(
+    data_objects:
+        tuple[User] |
+        tuple[Warframe] |
+        tuple[NotImplementedType] |
+        User |
+        Warframe |
+        NotImplementedType) -> None:
+    '''Inserts arg's name values into the database. Table is determined by the arg's type. Saves the changes.
 
     Args:
         data_objects: Dataclass objects containing the values to insert.
-        table: String representing the table to insert to.
     '''
+    data_type = get_type(data_objects)
     with sqlite3.connect(DATABASE) as db:
-        match table:
-            case 'users':
+        match data_type:
+            case classes.User:
                 sql = Path(SQL_DIR / 'add_user.sql').read_text()
-            case 'warframes':
+            case classes.Warframe:
                 sql = Path(SQL_DIR / 'add_warframe.sql').read_text()
-            case 'weapons':
+            case types.NotImplementedType:
                 raise NotImplementedError
             case _:
-                raise NoMatchError(table)
+                raise NoMatchError(data_type)
+        params = _split_for_sql(get_names(data_objects))
+        db.executemany(sql, params)
+        db.commit()
+
+#  incomplete
+def add_to_user(user: User,
+    data_objects:
+        tuple[Warframe] |
+        tuple[NotImplementedType] |
+        Warframe |
+        NotImplementedType) -> None:
+    '''Inserts rows into user lookup table matching the table arg. Saves the changes.
+
+    Args:
+        user: User object of the user being added to.
+        data_objects: Dataclass objects being added to the user lookup table.
+    '''
+    data_type = get_type(data_objects)
+    with sqlite3.connect(DATABASE) as db:
+        match data_type:
+            case classes.Warframe:
+                sql = Path(SQL_DIR / 'add_warframe_user.sql').read_text()
+            case types.NotImplementedType:
+                raise NotImplementedError
+            case _:
+                raise NoMatchError(data_type)
         params = _split_for_sql(get_names(data_objects))
         db.executemany(sql, params)
         db.commit()
