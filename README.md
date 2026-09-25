@@ -12,6 +12,17 @@ Python Ver 3.14.3+
 ## KNOWN ISSUES ##
 
 ## RELEASE NOTES ##
+### Version 1.4.0
+Removed deprecated string based functions.  
+Added delete function. Will not delete related rows from lookup tables.  
+Corrected some casing in several sql statements.  
+Separated and renamed sql statements into branching folders for legibility.
+Added new Path constants and updated sql references.  
+Added not found exceptions.  
+Implemented not found exceptions when corresponding ids don't exist in database.  
+Created function to return non-iterables as a singleton. Replaced iter_check and added in several places to shorten code.  
+Added delete_users_of and delete_from_users functions.  
+
 ### Version 1.3.0
 Renamed several functions for better use clarity.  
 Implemented row factory use for better code legibility.  

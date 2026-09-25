@@ -1,0 +1,2 @@
+DELETE FROM warframes_users_lookup
+WHERE warframes_users_lookup.warframe_id LIKE :warframe_id
