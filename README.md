@@ -2,7 +2,7 @@
 App to handle Warframe data such as owned warframes, weapons, arcanes, etc. Currently only can store users, warframes, and user/warframe combos.  
 
 Database stored locally.  
-Latest release allows program to be extracted and run without installing Python.  
+Latest release is constructed via Pyinstaller and allows the program to be extracted and run without installing Python.  
 
 ## DEPENDENCIES ##
 Python Ver 3.14.3+  
@@ -12,6 +12,13 @@ Python Ver 3.14.3+
 ## KNOWN ISSUES ##
 
 ## RELEASE NOTES ##
+### Version 1.3.0
+Renamed several functions for better use clarity.  
+Implemented row factory use for better code legibility.  
+Replaced numerous strings with constants for more efficient input.  
+Completed set_id function.  
+Conversion from string to dataclass completed for add_to_user function.  
+
 ### Version 1.2.0
 Created function to set dataclass object ids from the database.  
 Created function to add dataclass objects to a user in the corresponding lookup table.  
@@ -19,7 +26,7 @@ Created function to add users to a dataclass object in the corresponding lookup 
 Corrected the type annotations of data_objects arguments.  
 Created function to return if arg is iterable.  
 Created function to return the type of arg or arg's first element.  
-Added error to raise when arg isn't iterable and must be.
+Added error to raise when arg isn't iterable and must be.  
 Restructured add and get_users_of functions to automate sql statement determination. No longer require a parameter to do so.  
 
 ### Version 1.1.0

@@ -16,6 +16,8 @@ bird = User('bird')
 otter = User('otter')
 users = (joojoo, eee, bird, otter)
 voruna = Warframe('voruna')
+ember = Warframe('ember')
+warframes = (voruna, ember)
 
 tse = User('tse')
 tss = User('tss')
@@ -23,7 +25,7 @@ ttt = User('ttt')
 ooo = Warframe('ooo')
 okk = Warframe('okk')
 occ = Warframe('occ')
-warframes= (ooo, okk, occ)
+fake_warframes = (ooo, okk, occ)
 future = NotImplementedType()
 incomplete = NotImplementedType()
 wip = (future, incomplete)
@@ -34,12 +36,13 @@ df.iter_check(wip)
 df.get_type(warframes)
 df.get_type(joojoo)
 
-# df.set_ids(voruna)
+df.tuple_names(users)
+df.tuple_names(joojoo)
 
-df.get_names(users)
-df.get_names(joojoo)
+df.set_ids(voruna)
+df.set_ids(warframes)
 
-df._split_for_sql(df.get_names(users))  # noqa: SLF001
+df._split_for_sql(df.tuple_names(users))  # noqa: SLF001
 
 df.get_all('users')
 df.get_all('warframes')
@@ -72,8 +75,11 @@ non_altering_debug = 'End'
 
 WILL_ALTER_DATABASE = 'Continuing script will alter database!'
 
-df.add(warframes)
+df.add(fake_warframes)
 df.add(tse)
+
+df.add_to_user(tse, fake_warframes)
+df.add_to_user(tse, voruna)
 
 # STRING BASED
 

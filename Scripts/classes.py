@@ -5,12 +5,22 @@ from dataclasses import dataclass
 
 @dataclass
 class User:
-    '''testing.'''
+    '''User data model.
+
+    Attributes:
+        id: Unique identifier.
+        name: user's name.
+    '''
     name: str
     id: int = None
 
 @dataclass
 class Warframe:
-    '''testing.'''
+    '''Warframe data model.
+
+    Attributes:
+        id: Unique identifier.
+        name: warframe's name.
+    '''
     name: str
     id: int = None

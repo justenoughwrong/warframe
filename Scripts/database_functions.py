@@ -11,11 +11,17 @@ import classes
 from classes import User, Warframe
 from exceptions import NoMatchError, NotIterableError
 
-# Constants
+# Path Constants
 BASE_DIR = Path(__file__).parent.parent
 DATABASE = BASE_DIR / 'warframe.db'
-WARFRAME_NAMES = BASE_DIR / 'InitData' / 'warframes.txt'
+WARFRAMES_LIST = BASE_DIR / 'InitData' / 'warframes.txt'
 SQL_DIR = BASE_DIR / 'sql'
+
+# Database Column Constants
+USER_NAME = 'user_name'
+USER_ID = 'user_id'
+WARFRAME_NAME = 'warframe_name'
+WARFRAME_ID = 'warframe_id'
 
 
 def iter_check(_) -> bool:
@@ -35,7 +41,7 @@ def get_type(_) -> type:
     return type(_)
 
 
-def get_names(
+def tuple_names(
     data_objects:
         tuple[User] |
         tuple[Warframe] |
@@ -51,7 +57,7 @@ def get_names(
     return (data_objects.name,)
 
 
-def get_ids(
+def tuple_ids(
     data_objects:
         tuple[User] |
         tuple[Warframe] |
@@ -66,7 +72,7 @@ def get_ids(
         )
     return (data_objects.id,)
 
-# incomplete
+
 def set_ids(
     data_objects:
         tuple[User] |
@@ -75,31 +81,37 @@ def set_ids(
         User |
         Warframe |
         NotImplementedType) -> None:
-    '''Queries database for ids from matching table. Sets id for each dataclass object.'''
-    if iter_check(data_objects):
-        match type(data_objects[0]):
+    '''Queries database for ids that match the dataclass object. Tables searched are determined by dataclass object type. Sets id for each dataclass object.'''
+    data_type = get_type(data_objects)
+    with sqlite3.connect(DATABASE) as db:
+        db.row_factory = sqlite3.Row
+        match data_type:
             case classes.User:
-                # set multiple user ids
-                pass
+                sql = Path(SQL_DIR / 'select_user_id_by_name.sql').read_text()
+                if iter_check(data_objects):
+                    for user in data_objects:
+                        params = {USER_NAME: user.name}
+                        result = db.execute(sql, params).fetchone()
+                        user.id = result[USER_ID]
+                else:
+                    params = {USER_NAME: data_objects.name}
+                    result = db.execute(sql, params).fetchone()
+                    data_objects.id = result[USER_ID]
             case classes.Warframe:
-                # set multiple warframe ids
-                pass
+                sql = Path(SQL_DIR / 'select_warframe_id_by_name.sql').read_text()
+                if iter_check(data_objects):
+                    for warframe in data_objects:
+                        params = {WARFRAME_NAME: warframe.name}
+                        result = db.execute(sql, params).fetchone()
+                        warframe.id = result[WARFRAME_ID]
+                else:
+                    params = {WARFRAME_NAME: data_objects.name}
+                    result = db.execute(sql, params).fetchone()
+                    data_objects.id = result[WARFRAME_ID]
             case types.NotImplementedType:
                 raise NotImplementedError
             case _:
-                raise NoMatchError(type(data_objects[0]))
-    else:
-        match type(data_objects):
-            case classes.User:
-                # set single user id
-                pass
-            case classes.Warframe:
-                # set single warframe id
-                pass
-            case types.NotImplementedType:
-                raise NotImplementedError
-            case _:
-                raise NoMatchError(type(data_objects))
+                raise NoMatchError(data_type)
 
 
 def _split_for_sql(combined_tuple: tuple) -> tuple:
@@ -126,18 +138,19 @@ def get_all(table: str) -> tuple:
         Tuple of dataclass objects containing the corresponding names.
     '''
     with sqlite3.connect(DATABASE) as db:
+        db.row_factory = sqlite3.Row
         match table:
             case 'users':
                 query = Path(SQL_DIR / 'select_user_names.sql').read_text()
-                result = db.execute(query)
+                results = db.execute(query).fetchall()
                 return tuple(
-                    User(str(row[0])) for row in result.fetchall()
+                    User(row[USER_NAME]) for row in results
                 )
             case 'warframes':
                 query = Path(SQL_DIR / 'select_warframe_names.sql').read_text()
-                result = db.execute(query)
+                results = db.execute(query).fetchall()
                 return tuple(
-                    Warframe(str(row[0])) for row in result.fetchall()
+                    Warframe(row[WARFRAME_NAME]) for row in results
                 )
             case _:
                 raise NoMatchError(table)
@@ -154,13 +167,14 @@ def get_from_user(user: User, table: str) -> tuple:
         Tuple of dataclass objects matching the query results.
     '''
     with sqlite3.connect(DATABASE) as db:
-        params = {'user_name': user.name}
+        db.row_factory = sqlite3.Row
+        params = {USER_NAME: user.name}
         match table:
             case 'warframes':
                 query = Path(SQL_DIR / 'select_warframes_of_user.sql').read_text()
-                result = db.execute(query, params)
+                results = db.execute(query, params).fetchall()
                 return tuple(
-                    Warframe(str(row[0])) for row in result.fetchall()
+                    Warframe(row[WARFRAME_NAME]) for row in results
                 )
             case 'weapons':
                 raise NotImplementedError
@@ -182,17 +196,18 @@ def get_users_of(
     '''
     data_type = get_type(data_object)
     with sqlite3.connect(DATABASE) as db:
+        db.row_factory = sqlite3.Row
         match data_type:
             case classes.Warframe:
                 query = Path(SQL_DIR / 'select_users_of_warframe.sql').read_text()
-                params = {'warframe_name': data_object.name}
+                params = {WARFRAME_NAME: data_object.name}
             case types.NotImplementedType:
                 raise NotImplementedError
             case _:
                 raise NoMatchError(data_type)
-        result = db.execute(query, params)
+        results = db.execute(query, params).fetchall()
         return tuple(
-            User(str(row[0])) for row in result.fetchall()
+            User(row[USER_NAME]) for row in results
         )
 
 
@@ -220,11 +235,11 @@ def add(
                 raise NotImplementedError
             case _:
                 raise NoMatchError(data_type)
-        params = _split_for_sql(get_names(data_objects))
+        params = _split_for_sql(tuple_names(data_objects))
         db.executemany(sql, params)
         db.commit()
 
-#  incomplete
+
 def add_to_user(user: User,
     data_objects:
         tuple[Warframe] |
@@ -237,16 +252,25 @@ def add_to_user(user: User,
         user: User object of the user being added to.
         data_objects: Dataclass objects being added to the user lookup table.
     '''
+    set_ids(user)
+    set_ids(data_objects)
     data_type = get_type(data_objects)
     with sqlite3.connect(DATABASE) as db:
         match data_type:
             case classes.Warframe:
-                sql = Path(SQL_DIR / 'add_warframe_user.sql').read_text()
+                sql = Path(SQL_DIR / 'add_warframe_to_user.sql').read_text()
+                if iter_check(data_objects):
+                    params = tuple(
+                        {USER_ID: user.id, WARFRAME_ID: _.id} for _ in data_objects
+                    )
+                else:
+                    params = (
+                        {USER_ID: user.id, WARFRAME_ID: data_objects.id},
+                    )
             case types.NotImplementedType:
                 raise NotImplementedError
             case _:
                 raise NoMatchError(data_type)
-        params = _split_for_sql(get_names(data_objects))
         db.executemany(sql, params)
         db.commit()
 
@@ -420,40 +444,3 @@ def add_str(table: str, names: str) -> None:
         params = _split_for_sql_str(names)
         db.executemany(sql, params)
         db.commit()
-
-
-# def add_to(table1: str, name1: str, table2: str, name2: str) -> None:
-#     '''Inserts rows to corresponding lookup table.
-
-#     Args:
-#         table1: string representing table of name1. Used to determine lookup table.
-#         name1: string representing first name of lookup pair. Must be singular.
-#         table2: string representing table of name2. Used to determine lookup table.
-#         name2: string representing second name of lookup pair. May be one or more.
-#     '''
-#     with sqlite3.connect(DATABASE) as db:
-#         tables = (table1, table2)
-#         match tables:
-#             case tables if 'users' in tables and 'warframes' in tables:
-#                 sql = Path(SQL_DIR / 'add_warframe_to_user.sql').read_text()
-
-#             case _:
-#                 pass
-#         print('params need to use user/warframe_id')
-#         # print(params)
-#         # if type(name1) == str:
-#         #     params = {}
-
-
-# def test():
-#     with sqlite3.connect(DATABASE) as db:
-#         query = Path(SQL_DIR / 'add_warframe_to_user.sql').read_text()
-#         params = (
-#             {'user_id': 2, 'warframe_id': 1},
-#             {'user_id': 2, 'warframe_id': 2},
-#         )
-#         db.executemany(query, params)
-#         db.commit()
-
-
-# test()
